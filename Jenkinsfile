@@ -1,20 +1,19 @@
 pipeline {
-    agent any 
+    agent any
 
-    
     stages {
-        stage('Test Connexion Git') {
+
+        stage('MAVEN') {
             steps {
-                echo 'Pipeline demarre et code clone.'
-                
-                sh 'uname -a' 
+                sh "mvn -version"
             }
         }
-        
-        stage('Hello World') {
+
+        stage('GIT') {
             steps {
-                sh 'echo "CI Pipeline OK - Hello World!"' 
+                git branch: 'main', url: 'https://github.com/ahmed0199/DevOps.git'
             }
         }
+
     }
 }
