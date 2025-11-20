@@ -2,10 +2,18 @@ pipeline {
     agent any
 
     stages {
-        stage('Hello') {
+
+        stage('MAVEN') {
             steps {
-                echo 'Hello World'
+                sh "mvn -version"
+            }
+        }//message
+
+        stage('GIT') {
+            steps {
+                git branch: 'main', url: 'https://github.com/ahmed0199/DevOps.git'
             }
         }
+
     }
 }
