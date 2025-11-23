@@ -7,11 +7,11 @@ pipeline {
             steps {
                 sh "mvn -version"
             }
-        }//message
+        } // message
 
         stage('GIT') {
             steps {
-                git branch: 'main', url: 'https://github.com/ahmed0199/DevOps.git'
+                git branch: 'main', url: 'https://github.com/LindaTouil-git/devops.git'
             }
         }
 
