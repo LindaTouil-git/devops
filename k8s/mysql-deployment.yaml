@@ -9,8 +9,8 @@ spec:
   accessModes:
     - ReadWriteOnce
   hostPath:
-    path: "/mnt/data/mysql"  # ← Changez ici
-  storageClassName: standard  # ← Ajoutez cette ligne
+    path: "/mnt/data/mysql"
+  storageClassName: standard
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -23,6 +23,50 @@ spec:
   resources:
     requests:
       storage: 1Gi
-  storageClassName: standard  # ← Ajoutez cette ligne
+  storageClassName: standard
 ---
-# Le reste reste pareil...
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql
+  namespace: devops
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mysql
+  template:
+    metadata:
+      labels:
+        app: mysql
+    spec:
+      containers:
+        - name: mysql
+          image: mysql:8.0
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              value: root
+            - name: MYSQL_DATABASE
+              value: devopsdb
+          ports:
+            - containerPort: 3306
+          volumeMounts:
+            - mountPath: /var/lib/mysql
+              name: mysql-storage
+      volumes:
+        - name: mysql-storage
+          persistentVolumeClaim:
+            claimName: mysql-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql-service
+  namespace: devops
+spec:
+  selector:
+    app: mysql
+  ports:
+    - port: 3306
+      targetPort: 3306
+  type: ClusterIP
