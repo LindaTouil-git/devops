@@ -6,7 +6,8 @@ pipeline {
         IMAGE_NAME = "lindatouil/lindatouil_devops"
         IMAGE_TAG = "latest"
         DOCKER_CREDENTIALS = 'docker-hub'
-        SONAR_TOKEN = credentials('sonarqube-token')
+        SONAR_TOKEN = credentials('sonar-token')
+
     }
 
     triggers {
