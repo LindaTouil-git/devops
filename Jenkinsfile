@@ -1,14 +1,13 @@
 pipeline {
     agent any
     environment {
-        REGISTRY = "docker.io"          // Ton registre (ex: Docker Hub)
-        IMAGE_NAME = "lindatouil/lindatouil_devops" // Nom de ton image
-        IMAGE_TAG = "latest"            // Tag de l'image
+        REGISTRY = "docker.io"
+        IMAGE_NAME = "lindatouil/lindatouil_devops"
+        IMAGE_TAG = "latest"
         DOCKER_CREDENTIALS = 'docker-hub' // ID des credentials Jenkins
     }
     triggers {
-        // Le webhook GitHub déclenche déjà, mais on met un fallback
-        pollSCM('* * * * *') // Vérifie chaque minute au cas où
+        pollSCM('* * * * *') // Fallback si webhook GitHub ne marche pas
     }
     stages {
         stage('Checkout') {
@@ -25,21 +24,19 @@ pipeline {
         }
         stage('Build Project') {
             steps {
-                echo "Reconstruction du projet..."
+                echo "Build Maven du projet..."
                 sh 'mvn clean package -DskipTests'
             }
         }
         stage('Build Docker Image') {
             steps {
                 echo "Construction de l'image Docker..."
-                sh """
-                    docker build -t ${IMAGE_NAME}:${IMAGE_TAG} .
-                """
+                sh "docker build -t ${IMAGE_NAME}:${IMAGE_TAG} ."
             }
         }
         stage('Push Docker Image') {
             steps {
-                echo "Connexion & push sur le registre..."
+                echo "Push de l'image sur Docker Hub..."
                 withCredentials([usernamePassword(credentialsId: DOCKER_CREDENTIALS,
                                                  usernameVariable: 'USER',
                                                  passwordVariable: 'PASS')]) {
@@ -53,22 +50,23 @@ pipeline {
         }
         stage('Deploy to Kubernetes') {
             steps {
-                echo "Déploiement sur Kubernetes..."
-                sh 'kubectl apply -f mysql-deployment.yaml'
-                sh 'kubectl apply -f spring-deployment.yaml'
-                sh 'kubectl rollout restart deployment/spring-app -n devops'
+                echo "Déploiement sur Kubernetes (namespace devops)..."
+                // Les fichiers sont dans le dossier k8s/ du repo Git
+                sh 'kubectl apply -f k8s/mysql-deployment.yaml -n devops'
+                sh 'kubectl apply -f k8s/spring-deployment.yaml -n devops'
+                sh 'kubectl rollout restart deployment spring-app -n devops'
                 echo "Vérification du déploiement..."
                 sh 'kubectl get pods -n devops'
-                sh 'kubectl get svc -n devops'
+                sh 'kubectl get services -n devops'
             }
         }
     }
     post {
         success {
-            echo "Pipeline terminé avec succès 🎉"
+            echo "Pipeline terminé avec succès ! L'application est déployée sur Kubernetes 🎉🚀"
         }
         failure {
-            echo "Le pipeline a échoué ❌"
+            echo "Le pipeline a échoué ❌ Vérifie les logs pour corriger."
         }
     }
 }
