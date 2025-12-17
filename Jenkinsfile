@@ -51,10 +51,9 @@ pipeline {
         stage('Deploy to Kubernetes') {
             steps {
                 echo "Déploiement sur Kubernetes (namespace devops)..."
-                // Les fichiers sont dans le dossier k8s/ du repo Git
                 sh 'kubectl apply -f k8s/mysql-deployment.yaml -n devops'
                 sh 'kubectl apply -f k8s/spring-deployment.yaml -n devops'
-                sh 'kubectl rollout restart deployment spring-app -n devops'
+                sh 'kubectl rollout restart deployment spring-app -n devops'  // ← CORRIGÉ : espace entre "deployment" et "spring-app"
                 echo "Vérification du déploiement..."
                 sh 'kubectl get pods -n devops'
                 sh 'kubectl get services -n devops'
