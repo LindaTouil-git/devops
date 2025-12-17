@@ -39,7 +39,7 @@ pipeline {
                 -Dsonar.password=sonar'  // Ton nouveau mot de passe
         }
     }
-
+        }
         stage('Build Docker Image') {
             steps {
                 echo "Construction de l'image Docker..."
