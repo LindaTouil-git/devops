@@ -27,7 +27,19 @@ pipeline {
                 echo "Build Maven du projet..."
                 sh 'mvn clean package -DskipTests'
             }
+        } 
+        stage('SonarQube Analysis') {
+    steps {
+        echo "Analyse qualité du code avec SonarQube..."
+        withSonarQubeEnv('SonarQube Server') { 
+            sh 'mvn sonar:sonar \
+                -Dsonar.projectKey=lindatouil_devops \
+                -Dsonar.host.url=http://localhost:9000 \
+                -Dsonar.login=admin \
+                -Dsonar.password=sonar'  // Ton nouveau mot de passe
         }
+    }
+
         stage('Build Docker Image') {
             steps {
                 echo "Construction de l'image Docker..."
